@@ -1,4 +1,5 @@
 import type { IncomingMessage, ServerResponse } from "http";
+import productController from "../controllers/product.controller";
 
 const routeHandler = (req : IncomingMessage, res:ServerResponse) => {
     const url = req.url
@@ -9,8 +10,7 @@ const routeHandler = (req : IncomingMessage, res:ServerResponse) => {
         res.writeHead(200,{"Content-Type": "application/json"});
         res.end(JSON.stringify({messege: "This is root route!!"}));
     }else if(url?.startsWith("/products")){
-        res.writeHead(200, {"Content-Type": "application/json"});
-        res.end(JSON.stringify({message: "This is Products route!!"}));
+        productController(req,res);
     }
     else{
         //console.log("This is route is not define")
