@@ -2,6 +2,7 @@ import type { IncomingMessage, ServerResponse } from "http";
 import { createProduct, productService } from "../service/product.service";
 import type { IProduct } from "../types/product";
 import { bodyParser } from "../utils/parseBody";
+import { json } from "stream/consumers";
 
 
 const productController = async (req: IncomingMessage,res:ServerResponse)=>{
@@ -73,6 +74,34 @@ const productController = async (req: IncomingMessage,res:ServerResponse)=>{
                 data: newProduct,
             }),
         );
+    }else if(method === "PUT" && id !== null){
+        const body = await bodyParser(req);// raw node a req.body ready thakena bodyParser chunk joma kore Json banai
+        const products = productService();// purono data load kore cause update korte hole existing list lagbe
+
+        const index = products.findIndex((p:IProduct)=>p.id === id); //? repacle korer position khuje ber kora hocce findIndex diye 
+        //console.log(index);
+        if(index < 0){
+            res.writeHead(404, {"Content-Type": "application/json"});
+            res.end(
+                JSON.stringify({
+                    message: "Product not found",
+                })
+            )
+        }
+        //console.log(products[index]);
+        products[index] = {id: products[index].id, ...body};
+
+        createProduct(products)
+
+        res.writeHead(200, {"Content-Type" : "application/json"});
+        res.end(
+            JSON.stringify({
+                message: "Product updated successfully!",
+                data: products[index],
+            })
+        )
+    }else if(method === "PATCH" && id !== null){
+        //PATCH = partial update , only the fields sent in the body are changed
     }
 }
 
