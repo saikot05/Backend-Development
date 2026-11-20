@@ -102,7 +102,38 @@ const productController = async (req: IncomingMessage,res:ServerResponse)=>{
         )
     }else if(method === "PATCH" && id !== null){
         //PATCH = partial update , only the fields sent in the body are changed
+        const body = await bodyParser(req);// collect and parse the Json body
+
+        const products = productService();// load the current products
+
+        const index = products.findIndex((p: IProduct)=> p.id === id);
+
+        if(index < 0){
+            res.writeHead(404, {"Content-Type": "application/json"});
+            res.end(
+                JSON.stringify({
+                    message: "Product not found",
+                })
+            )
+        }
+
+        products[index] = {
+            ...products[index],
+            ...(body.name !== undefined && {name: body.name}),
+            ...(body.price !== undefined && {price: body.price}),
+        };
+        createProduct(products);
+
+        res.writeHead(200,{"Content-Type": "application/json"});
+        res.end(
+            JSON.stringify({
+                message: "Product updated Succcessfully",
+                data: products[index],
+            })
+        )
+
     }
+    
 }
 
 export default productController;
